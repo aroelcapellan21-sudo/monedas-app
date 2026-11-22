@@ -92,6 +92,12 @@ public class MainActivity extends Activity {
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+        Actualizar.revisar(this, false);   // paso 5: ¿hay versión nueva en GitHub? (como mucho cada 6 horas)
+    }
+
+    @Override
     protected void onSaveInstanceState(Bundle b) {
         super.onSaveInstanceState(b);
         web.saveState(b);
@@ -140,7 +146,8 @@ public class MainActivity extends Activity {
             runOnUiThread(() -> huella.leer(clave -> js("window.monedasHuella && window.monedasHuella(" + comillas(clave) + ")")));
         }
         @JavascriptInterface public void quitarHuella() { huella.borrar(); }
-        @JavascriptInterface public String version() { return "3"; }
+        @JavascriptInterface public String version() { return String.valueOf(Actualizar.miVersion(MainActivity.this)); }
+        @JavascriptInterface public void buscarActualizacion() { runOnUiThread(() -> Actualizar.revisar(MainActivity.this, true)); }
         /** Paso 4: la página manda {disp, encendidos, sonido, sonidoVigia, silencio}; se guarda y se prende/apaga el servicio. */
         @JavascriptInterface public void configurarAvisos(String json) {
             try {
