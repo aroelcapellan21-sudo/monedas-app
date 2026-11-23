@@ -89,6 +89,30 @@ public class MainActivity extends Activity {
                     WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS | WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS);
         }
         if (b != null) web.restoreState(b); else web.loadUrl(DIRECCION);
+        irDesdeAviso(getIntent());
+    }
+
+    /** 54: el botón de la notificación «Ver la compra #N»: la página va a esa compra (si aún no se entró, lo hace al entrar). */
+    void irDesdeAviso(Intent i) {
+        if (i == null || i.getStringExtra("ir_moneda") == null) return;
+        String m = i.getStringExtra("ir_moneda").replaceAll("[^A-Z0-9]", ""), c = i.getStringExtra("ir_compra");
+        c = c == null ? "null" : c.replaceAll("[^0-9]", "");
+        if (c.isEmpty()) c = "null";
+        final String js = "(window.monedasIrA ? (window.monedasIrA('" + m + "', " + c + "), 1) : 0)";
+        i.removeExtra("ir_moneda");
+        new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(new Runnable() {
+            int vueltas = 0;
+            public void run() {   // espera a que la página esté cargada
+                web.evaluateJavascript(js, v -> { if (!"1".equals(v) && ++vueltas < 20) new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(this, 700); });
+            }
+        }, 400);
+    }
+
+    @Override
+    protected void onNewIntent(Intent i) {
+        super.onNewIntent(i);
+        setIntent(i);
+        irDesdeAviso(i);
     }
 
     @Override
@@ -158,6 +182,9 @@ public class MainActivity extends Activity {
                 if (j.has("sonido")) e.putString("sonido", j.getString("sonido"));
                 if (j.has("sonidoVigia")) e.putString("sonidoVigia", j.getString("sonidoVigia"));
                 if (j.has("silencio")) e.putBoolean("silencio", j.getBoolean("silencio"));
+                if (j.has("t_compra")) e.putString("t_compra", j.getString("t_compra"));   // 54: textos de los botones, en el idioma de la página
+                if (j.has("t_moneda")) e.putString("t_moneda", j.getString("t_moneda"));
+                if (j.has("tira_ms")) e.putInt("tira_ms", j.getInt("tira_ms"));
                 e.apply();
                 runOnUiThread(() -> { pedirPermiso(); Avisos.aplicar(MainActivity.this); });
             } catch (Exception ex) { }
