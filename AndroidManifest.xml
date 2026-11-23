@@ -41,6 +41,9 @@
                 android:value="Revisa cada minuto los avisos de la billetera de la persona (metas cumplidas, ventas, alertas) y los muestra." />
         </service>
 
+        <!-- Punto 38: compartir el archivo de la app (solo lectura, con permiso pasajero para la app que lo recibe). -->
+        <provider android:name=".ApkProveedor" android:authorities="dev.monedas.billetera.apk" android:exported="false" android:grantUriPermissions="true" />
+
         <receiver android:name=".Actualizar$Instalado" android:exported="false" />
 
         <receiver android:name=".Arranque" android:exported="true">

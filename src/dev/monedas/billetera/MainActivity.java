@@ -170,5 +170,27 @@ public class MainActivity extends Activity {
             } catch (Exception e) { return "{}"; }
         }
         @JavascriptInterface public void probarSonido(String nombre) { Avisos.sonar(MainActivity.this, nombre); }
+        /** Punto 38: manda el archivo de la app por el menú de compartir del teléfono (Telegram, WhatsApp, Instagram…). */
+        @JavascriptInterface public void compartirApk() {
+            runOnUiThread(() -> {
+                Intent i = new Intent(Intent.ACTION_SEND);
+                i.setType("application/vnd.android.package-archive");
+                i.putExtra(Intent.EXTRA_STREAM, Uri.parse("content://" + ApkProveedor.AUTORIDAD + "/Monedas.apk"));
+                i.putExtra(Intent.EXTRA_TEXT, "Monedas: la app de la Billetera");
+                i.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                startActivity(Intent.createChooser(i, "Enviar la app"));
+            });
+        }
+        /** Punto 38: manda un texto (el enlace) por el menú de compartir. */
+        @JavascriptInterface public void compartirTexto(String texto) {
+            runOnUiThread(() -> {
+                Intent i = new Intent(Intent.ACTION_SEND); i.setType("text/plain"); i.putExtra(Intent.EXTRA_TEXT, texto);
+                startActivity(Intent.createChooser(i, "Compartir el enlace"));
+            });
+        }
+        /** Punto 38: copia un texto al portapapeles. */
+        @JavascriptInterface public void copiar(String texto) {
+            runOnUiThread(() -> ((android.content.ClipboardManager) getSystemService(CLIPBOARD_SERVICE)).setPrimaryClip(android.content.ClipData.newPlainText("Monedas", texto)));
+        }
     }
 }
